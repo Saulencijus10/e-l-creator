@@ -1,0 +1,22 @@
+{
+  "name": "e-l-creator",
+  "version": "1.0.0",
+  "description": "Encoding language creator, decoder, encoder, works on files.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saulencijus10/e-l-creator.git"
+  },
+  "keywords": [
+    "e-l-c"
+  ],
+  "author": "Meterelokets",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Saulencijus10/e-l-creator/issues"
+  },
+  "homepage": "https://github.com/Saulencijus10/e-l-creator#readme"
+}
