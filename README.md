@@ -23,5 +23,3 @@ Function list:
 | `initiate_web()` | `port*` | `None`         | Starts a web server on the given port.       |
 
 \* Required parameter
-
-* means it's required.
