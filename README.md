@@ -15,19 +15,12 @@ Here's step by step on how to install and use my encoding language creator.
 
 Function list:
 
-| Function | Parameters |
-| :------- | :--------- |
-| new App() | PathToJson* |
-| encode() | whatToEncode*, level* |
-| decode() | whatToDecode* |
-| initiate_web() | port* |
-
 | Function         | Parameters                | Returns        | Description                                  |
 | :--------------- | :------------------------ | :------------- | :------------------------------------------- |
-| `new App()`      | `configFilePath`* | `App Instance` | Creates a new App object using the config. |
-| `encode()`       | `dataToEncode`*, `encodingLevel`* | `Encoded Data` | Encodes the provided data.                  |
-| `decode()`       | `encodedData`* | `Decoded Data` | Decodes the provided data.                  |
-| `initiate_web()` | `port`* | `None`         | Starts a web server on the given port.       |
+| `new App()`      | `configFilePath*` | `App Instance` | Creates a new App object using the config. |
+| `encode()`       | `dataToEncode*`, `encodingLevel*` | `Encoded Data` | Encodes the provided data.                  |
+| `decode()`       | `encodedData*` | `Decoded Data` | Decodes the provided data.                  |
+| `initiate_web()` | `port*` | `None`         | Starts a web server on the given port.       |
 
 \* Required parameter
 
