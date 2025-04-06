@@ -23,3 +23,6 @@ Function list:
 | `initiate_web()` | `port*` | `None`         | Starts a web server on the given port.       |
 
 \* Required parameter
+
+Version 1.0.1
+* Fixed most of the bugs in the code(except for web, yo may still encounter crashes while uploading big files)
