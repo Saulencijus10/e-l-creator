@@ -8,10 +8,31 @@ class App {
     constructor(encodingFilePath) {
         this.encodingFilePath = encodingFilePath;
         //this.resolvedPath = null;  // Default value to prevent undefined errors
-        this.initiate();
+        //this.initiate();
+        this.resolvedPath2 = false;
+        if (typeof this.encodingFilePath == 'string') {
+            const resolvedPath = path.resolve(this.encodingFilePath);
+            try {
+                const stats = fs.statSync(resolvedPath);
+                const ext = path.extname(resolvedPath);
+                if (ext == '.json') {
+                    this.resolvedPath = resolvedPath;
+                } else {
+                    this.resolvedPath2 = true;
+                    throw new Error('Error, file must be .json')
+                }
+            } catch (error) {
+                this.resolvedPath2 = true;
+                console.debug('Error: Path error: ', error);
+                //console.log(`${resolvedPath} is a valid file.`);
+            }
+        } else {
+            this.resolvedPath2 = true;
+            throw new Error('Error, file path is wrong');
+        }
     }
 
-    initiate() {
+    /*initiate() {
         if (typeof this.encodingFilePath == 'string') {
             const resolvedPath = path.resolve(this.encodingFilePath);
             try {
@@ -33,14 +54,16 @@ class App {
         } else {
             console.log('Error, file path is wrong');
         }
-    }
+    }*/
 
     encode(what_to_encode, level) {
+        if (this.resolvedPath2) {
+            throw new Error('Error while initializing.')
+        }
         let data = fs.readFileSync(this.resolvedPath, 'utf8');
         if (!data.trim()) {
             fs.writeFileSync(this.resolvedPath, '{}');
         }
-        data = fs.readFileSync(this.resolvedPath, 'utf8');
         let jsonData = JSON.parse(data);
         if (!jsonData.symbols) {
             jsonData.symbols = {};
@@ -49,28 +72,27 @@ class App {
             jsonData.options = {};
         }
         fs.writeFileSync(this.resolvedPath, JSON.stringify(jsonData, null, 2));
-        if ((typeof level == 'number') && (!jsonData.options.DefaulLevel)) {
+        if ((typeof level == 'number') && (!jsonData.options.DefaulLevel) && level > 0) {
             console.log('ATTENTION: AFTER THE LEVEL WAS SET WHEN BOOTING THE LANGUAGE FOR THE FIRST TIME, IF YOU CHANGE THE VALUE THE DECODING WILL STOP WORKING AS EXPECTED, SO WHEN SHARING A DECODING LANGUAGE IN PARAMETERES OF THE ENCODE FUNCTION PLEASE USE null.');
             if (!jsonData.options.defaultLevel) {
                 jsonData.options.DefaulLevel = level;
             }
             fs.writeFileSync(this.resolvedPath, JSON.stringify(jsonData, null, 2));
-        } else if ((!(typeof level == 'number'))) {
+        } else if ((!(typeof level == 'number') || level <= 0)) {
             console.log('Level was undefined(this is only required for the first time) ATTENTION: AFTER THE LEVEL WAS SET WHEN BOOTING THE LANGUAGE FOR THE FIRST TIME, IF YOU CHANGE THE VALUE THE DECODING WILL STOP WORKING AS EXPECTED, SO WHEN SHARING A DECODING LANGUAGE IN PARAMETERES OF THE ENCODE FUNCTION PLEASE USE null.')
             return;
         }
         let encoded = "";
+        jsonData = JSON.parse(data);
         if ((typeof what_to_encode == 'string') && ((level == null) || (typeof level == 'number'))) {
             for (let i = 0; i < what_to_encode.length; i++) {
-                data = fs.readFileSync(this.resolvedPath, 'utf8');
-                jsonData = JSON.parse(data);
                 const symbol = what_to_encode[i];
                 if (!jsonData.symbols[symbol]) {
-                    let length = "";
+                    let length = "1";
                     let result = '';
                     let isUnique = false;
-                    for (let i = 0; i < jsonData.options.DefaulLevel; i++) {
-                        length = length += jsonData.options.DefaulLevel;
+                    for (let i = 1; i < jsonData.options.DefaulLevel; i++) {
+                        length = length += '0';
                     }
                     length = parseInt(length);
                     if (length === Object.keys(jsonData.symbols).length) {
@@ -86,39 +108,65 @@ class App {
                         }
                     }
                     jsonData.symbols[symbol] = result;
-                    fs.writeFileSync(this.resolvedPath, JSON.stringify(jsonData, null, 2));
                 }
                 let curLevel;
                 if (level >= jsonData.options.DefaulLevel) {
                     curLevel = jsonData.options.DefaulLevel;
-                } else if (0 > level < jsonData.options.DefaulLevel) {
+                } else if (0 < level && level < jsonData.options.DefaulLevel) {
                     curLevel = level;
                 } else {
-                    console.log('Level is wrong, seti it to either number or null')
+                    curLevel = jsonData.options.defaultLevel;
                 }
                 let str = jsonData.symbols[symbol];
                 if (jsonData.symbols[symbol].length === 9) {
                     const trimmedStr = str.substring(0, curLevel);
                     encoded += trimmedStr;
                 } else {
-                    encoded += 'Error';
+                    let length = "1";
+                    let result = '';
+                    let isUnique = false;
+                    for (let i = 1; i < jsonData.options.DefaulLevel; i++) {
+                        length = length += '0';
+                    }
+                    length = parseInt(length);
+                    if (length === Object.keys(jsonData.symbols).length) {
+                        isUnique = true;
+                        console.log("Your default Level is too low, please reset your Encoding language.")
+                    }
+                    while (!isUnique) {
+                        for (let i = 0; i < jsonData.options.DefaulLevel; i++) {
+                            result += Math.floor(Math.random() * 10);
+                        }
+                        if (!Object.values(jsonData.symbols).includes(result)) {
+                            isUnique = true;
+                        }
+                    }
+                    jsonData.symbols[symbol] = result;
+                    encoded += jsonData.symbols[symbol];
                     console.log("Error: the default level is wrong, reset the encoding language.");
                 }
             }
         }
+        fs.writeFileSync(this.resolvedPath, JSON.stringify(jsonData, null, 2));
         let curLevel;
         if (level >= jsonData.options.DefaulLevel) {
             curLevel = jsonData.options.DefaulLevel;
-        } else if (0 > level < jsonData.options.DefaulLevel) {
+        } else if (0 < level && level < jsonData.options.DefaulLevel) {
             curLevel = level;
         } else {
-            console.log('Level is wrong, set it to either number or null')
+            curLevel = jsonData.options.defaultLevel;
         }
         encoded += ":";
         encoded += curLevel;
         return encoded;
     }
     decode(what_to_decode) {
+        if (this.resolvedPath2) {
+            throw new Error('Error while initializing.');
+        }
+        if (what_to_decode == "" || !what_to_decode.split(':')[1]) {
+            throw new Error("Error in decode perimeters.");
+        }
         const data = JSON.parse(fs.readFileSync(this.resolvedPath, 'utf8'));
         let index = what_to_decode.split(':')[1];
         let codeOr = what_to_decode.split(':')[0];
@@ -140,6 +188,9 @@ class App {
         return decode;
     }
     initiate_web(port) {
+        if (this.resolvedPath2) {
+            throw new Error('Error while initializing.')
+        }
         let data = fs.readFileSync(this.resolvedPath, 'utf8');
         let jsonData = JSON.parse(data);
         const server = http.createServer((req, res) => {
